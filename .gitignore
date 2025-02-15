@@ -7,3 +7,12 @@ Cargo.lock
 /tor-src/src/rust/tor_rust/Cargo.toml
 
 *.swp
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
