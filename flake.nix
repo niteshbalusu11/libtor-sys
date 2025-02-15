@@ -35,14 +35,7 @@
         system:
         android-nixpkgs.sdk.${system} (
           sdkPkgs: with sdkPkgs; [
-            # build-tools-35-0-0
-            # build-tools-34-0-0
             cmdline-tools-latest
-            # platform-tools
-            # platforms-android-34
-            # platforms-android-35
-            # ndk-25-1-8937393
-            # ndk-26-1-10909125
             ndk-27-1-12297006
           ]
         );
@@ -88,10 +81,8 @@
               exec /usr/bin/clang "\$@"
               EOF
 
-              # Make all wrapper scripts executable
               chmod +x $out/bin/*
 
-              # Check if Xcode exists without using the wrappers
               if [ -d "/Applications/Xcode-16.2.0.app" ]; then
                 DEVELOPER_DIR="/Applications/Xcode-16.2.0.app/Contents/Developer"
               elif [ -d "/Applications/Xcode.app" ]; then
@@ -101,14 +92,12 @@
                 exit 1
               fi
 
-              # Export the developer directory for the shell session
               echo "export DEVELOPER_DIR=\"$DEVELOPER_DIR\"" > $out/bin/env.sh
             '';
           };
 
-        setupScript =
-          pkgs:
-          pkgs.writeScriptBin "setup-ios-env" ''
+        scripts = pkgs: {
+          setup-ios-env = pkgs.writeScriptBin "setup-ios-env" ''
             #!${pkgs.stdenv.shell}
             export XCODE_VERSION="16.2.0"
             export XCODES_VERSION="1.6.0"
@@ -129,13 +118,9 @@
 
               echo "Switching to Xcode at $XCODE_PATH..."
               sudo xcode-select --switch "$XCODE_PATH/Contents/Developer"
-
-              SELECTED_PATH=$(xcode-select -p)
-              echo "Selected Xcode path: $SELECTED_PATH"
-
+              echo "Selected Xcode path: $(xcode-select -p)"
               echo "Accepting Xcode license..."
               sudo xcodebuild -license accept
-
               echo "Xcode setup completed!"
               xcodebuild -version
             else
@@ -143,6 +128,43 @@
               exit 1
             fi
           '';
+
+          build-ios = pkgs.writeScriptBin "build-ios" ''
+            #!${pkgs.stdenv.shell}
+            echo "Building for iOS..."
+            chmod +x ./build-ios.sh
+            ./build-ios.sh
+          '';
+
+          build-macos = pkgs.writeScriptBin "build-macos" ''
+            #!${pkgs.stdenv.shell}
+            echo "Building for macOS..."
+            chmod +x ./build-macos.sh
+            ./build-macos.sh
+          '';
+
+          build-android = pkgs.writeScriptBin "build-android" ''
+            #!${pkgs.stdenv.shell}
+            echo "Building for Android..."
+            chmod +x ./build-android.sh
+            ./build-android.sh
+          '';
+
+          build-all = pkgs.writeScriptBin "build-all" ''
+            #!${pkgs.stdenv.shell}
+            echo "Building for Android..."
+            chmod +x ./build-android.sh
+            ./build-android.sh
+
+            echo "Building for iOS..."
+            chmod +x ./build-ios.sh
+            ./build-ios.sh
+
+            echo "Building for macOS..."
+            chmod +x ./build-macos.sh
+            ./build-macos.sh
+          '';
+        };
       };
 
       # System-specific shell configuration
@@ -151,49 +173,42 @@
         let
           pkgs = pkgsFor system;
           androidSdk = androidSdkFor system;
+          scripts = darwinDerivations.scripts pkgs;
 
-          # Base packages for all systems
           basePackages = with pkgs; [
             cargo-ndk
             androidSdk
-            jdk17
-
             autoconf
             automake
             libtool
             openssl
           ];
 
-          # macOS-specific packages
           darwinPackages = with pkgs; [
-            cocoapods
-            ruby
-            bundler
             darwin.apple_sdk.frameworks.CoreServices
             darwin.apple_sdk.frameworks.CoreFoundation
             darwin.apple_sdk.frameworks.Foundation
             darwin.apple_sdk.frameworks.Security
             darwin.apple_sdk.frameworks.SystemConfiguration
             (darwinDerivations.xcode-wrapper pkgs)
-            (darwinDerivations.setupScript pkgs)
+            scripts.setup-ios-env
+            scripts.build-ios
+            scripts.build-macos
+            scripts.build-android
+            scripts.build-all
           ];
 
-          # Shell hook for macOS
           darwinHook = ''
             export LC_ALL=en_US.UTF-8
             export LANG=en_US.UTF-8
 
             rustup target add aarch64-linux-android x86_64-linux-android i686-linux-android
-
             rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-darwin x86_64-apple-darwin
 
-            # Source the Xcode environment file
             if [ -f "${darwinDerivations.xcode-wrapper pkgs}/bin/env.sh" ]; then
               source "${darwinDerivations.xcode-wrapper pkgs}/bin/env.sh"
             fi
 
-            export PLATFORM_NAME=iphoneos
-            export SDKROOT="$DEVELOPER_DIR/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
             export LD=/usr/bin/clang
             export LD_FOR_TARGET=/usr/bin/clang
 
@@ -205,12 +220,10 @@
             xcodebuild -version
           '';
 
-          # Linux-specific shell hook
           linuxHook = ''
             export LC_ALL=en_US.UTF-8
             export LANG=en_US.UTF-8
-
-            rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+            rustup target add aarch64-linux-android x86_64-linux-android i686-linux-android
           '';
 
         in

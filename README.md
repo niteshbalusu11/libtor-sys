@@ -15,7 +15,7 @@ respective compression algorithms, and the `vendored-lzma` and `vendored-zstd` f
 The currently supported platforms are:
 
 * Linux (tested on Fedora 30 and Ubuntu Xenial)
-* Android through the NDK
+* Android through the NDK (API level 30+)
 * MacOS
 * iOS
 
@@ -28,11 +28,14 @@ The currently supported platforms are:
 
 ```
 # Build Android
-chmod + ./build-android.sh && ./build-android.sh
+build-android
 
 # Build iOS
-chmod + ./build-ios.sh && ./build-ios.sh 
+build-ios
 
 # Build MacOS
-chmod + ./build-macos.sh && ./build-macos.sh
+build-macos
+
+# Build all
+build-all
 ```

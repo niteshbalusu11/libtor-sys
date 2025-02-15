@@ -4,14 +4,18 @@
 set -e
 
 # Set up iOS-specific environment
-export PLATFORM_NAME=iphoneos
+unset PLATFORM_NAME
+unset DEVELOPER_DIR
+unset SDKROOT
+# export PLATFORM_NAME=iphoneos
 export DEVELOPER_DIR="$(xcode-select -p)"
-export SDKROOT="$DEVELOPER_DIR/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
+# export SDKROOT="$DEVELOPER_DIR/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
 
 # First, make sure we have the targets
 rustup target add \
     x86_64-apple-ios \
-    aarch64-apple-ios
+    aarch64-apple-ios \
+    aarch64-apple-ios-sim
 
 # Then, build the library
 mkdir -p target/ios
@@ -22,9 +26,15 @@ cargo build --release \
     --features "vendored-openssl" \
     --target-dir "target/ios"
 
-echo "Building for iOS Simulator (x86_64)..."
+echo "Building for iOS (x86_64)..."
 cargo build --release \
     --target x86_64-apple-ios \
+    --features "vendored-openssl" \
+    --target-dir "target/ios"
+
+echo "Building for iOS (aarch64-sim)..."
+cargo build --release \
+    --target aarch64-apple-ios-sim \
     --features "vendored-openssl" \
     --target-dir "target/ios"
 

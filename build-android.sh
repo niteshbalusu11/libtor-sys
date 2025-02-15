@@ -21,7 +21,7 @@ mkdir -p target/android
 
 echo "Building for Android..."
 cargo ndk \
-    --platform 34 \
+    --platform 30 \
     -t arm64-v8a \
     -t x86 \
     -t x86_64 \

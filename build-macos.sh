@@ -6,8 +6,10 @@ set -e
 # Set up macOS-specific environment
 unset SDKROOT
 unset PLATFORM_NAME
+unset DEVELOPER_DIR
+export DEVELOPER_DIR="$(xcode-select -p)"
 export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
-export MACOSX_DEPLOYMENT_TARGET="11.0"
+# export MACOSX_DEPLOYMENT_TARGET="11.0"
 
 # First, make sure we have the targets
 rustup target add \
