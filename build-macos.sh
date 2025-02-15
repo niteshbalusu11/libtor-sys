@@ -3,20 +3,21 @@
 # Exit on error
 set -e
 
+# Set up macOS-specific environment
+unset SDKROOT
+unset PLATFORM_NAME
+export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+export MACOSX_DEPLOYMENT_TARGET="11.0"
+
 # First, make sure we have the targets
 rustup target add \
     aarch64-apple-darwin \
     x86_64-apple-darwin
 
-# Ensure we're using macOS SDK
-unset SDKROOT
-unset PLATFORM_NAME
-export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
-
 # Create output directory
 mkdir -p target/macos
 
-# Build for Apple Silicon (M1/M2)
+# Build for Apple Silicon
 echo "Building for Apple Silicon (arm64)..."
 cargo build --release \
     --target aarch64-apple-darwin \
@@ -44,4 +45,4 @@ else
     echo "Warning: Could not create universal binary. One or both architecture builds are missing."
 fi
 
-echo "Build complete!"
+echo "macOS build complete!"

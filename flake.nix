@@ -136,9 +136,6 @@
               echo "Accepting Xcode license..."
               sudo xcodebuild -license accept
 
-              echo "Installing iOS simulator runtime..."
-              xcrun simctl runtime add "iOS 17.0" || true
-
               echo "Xcode setup completed!"
               xcodebuild -version
             else
@@ -186,7 +183,7 @@
             export LC_ALL=en_US.UTF-8
             export LANG=en_US.UTF-8
 
-            rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+            rustup target add aarch64-linux-android x86_64-linux-android i686-linux-android
 
             rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-darwin x86_64-apple-darwin
 
@@ -202,33 +199,10 @@
 
             sudo xcode-select --switch "$DEVELOPER_DIR"
 
-            pod-install() {
-              cd ios
-              rm -rf Pods
-              rm -rf ~/Library/Caches/CocoaPods
-              pod cache clean --all
-
-              DEVELOPER_DIR="$DEVELOPER_DIR" \
-              SDKROOT="$SDKROOT" \
-              LD="$LD" \
-              LD_FOR_TARGET="$LD_FOR_TARGET" \
-              pod install --repo-update
-            }
-
-            run-ios() {
-              DEVELOPER_DIR="$DEVELOPER_DIR" \
-              SDKROOT="$SDKROOT" \
-              yarn react-native run-ios
-            }
-
             echo "iOS development environment:"
             echo "DEVELOPER_DIR: $DEVELOPER_DIR"
             echo "SDKROOT: $SDKROOT"
             xcodebuild -version
-            echo ""
-            echo "Available commands:"
-            echo "  pod-install  - Install CocoaPods dependencies"
-            echo "  run-ios      - Run the app in iOS simulator"
           '';
 
           # Linux-specific shell hook

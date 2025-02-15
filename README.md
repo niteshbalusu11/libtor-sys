@@ -49,3 +49,22 @@ Cross-compiling for iOS on a Mac that has the `Xcode Command Line Tools` install
 
 Cross-compiling for Windows using MingW should also work out of the box, as long as you have the right compiler and the required libraries installed. To link the library into binaries it's generally required to also
 install the static version of `libwinpthreads`.
+
+
+### Build using nix on a Mac
+- Install [nix](https://determinate.systems/nix-installer/)
+- Install [direnv](https://direnv.net/)
+- Run `direnv allow` to allow direnv to load the nix environment
+- If you want to install xcode and xcode command line tools, simply run `setup-ios-env`.
+
+
+```
+# Build Android
+chmod + ./build-android.sh && ./build-android.sh
+
+# Build iOS
+chmod + ./build-ios.sh && ./build-ios.sh 
+
+# Build MacOS
+chmod + ./build-macos.sh && ./build-macos.sh
+```
