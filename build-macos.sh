@@ -33,7 +33,7 @@ cargo build --release \
     --features "vendored-openssl" \
     --target-dir "target/macos"
 
-# Create universal binary (optional)
+# Create universal dynamic binary (optional)
 echo "Creating universal binary..."
 if [ -f "target/macos/aarch64-apple-darwin/release/libtor_sys.dylib" ] && \
    [ -f "target/macos/x86_64-apple-darwin/release/libtor_sys.dylib" ]; then
@@ -45,6 +45,20 @@ if [ -f "target/macos/aarch64-apple-darwin/release/libtor_sys.dylib" ] && \
     echo "Universal binary created at target/macos/universal/libtor_sys.dylib"
 else
     echo "Warning: Could not create universal binary. One or both architecture builds are missing."
+fi
+
+# Create universal static binary (optional)
+echo "Creating universal static binary..."
+if [ -f "target/macos/aarch64-apple-darwin/release/libtor_sys.a" ] && \
+   [ -f "target/macos/x86_64-apple-darwin/release/libtor_sys.a" ]; then
+    mkdir -p target/macos/universal
+    lipo -create \
+        target/macos/aarch64-apple-darwin/release/libtor_sys.a \
+        target/macos/x86_64-apple-darwin/release/libtor_sys.a \
+        -output target/macos/universal/libtor_sys.a
+    echo "Universal static binary created at target/macos/universal/libtor_sys.a"
+else
+    echo "Warning: Could not create universal static binary. One or both architecture builds are missing."
 fi
 
 echo "macOS build complete!"

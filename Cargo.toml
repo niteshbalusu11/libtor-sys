@@ -29,7 +29,7 @@ autotools = "^0.2.2"
 [lib]
 name = "tor_sys"
 path = "src/lib.rs"
-crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib", "rlib", "staticlib"]
 
 [features]
 vendored-openssl = ["openssl-sys/vendored"]
