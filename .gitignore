@@ -1,5 +1,4 @@
 /target
-Cargo.lock
 
 /tor-src/autom4te.cache/
 /tor-src/configure.ac.orig
